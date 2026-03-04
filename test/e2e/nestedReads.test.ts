@@ -2,6 +2,7 @@ import { PrismaClient, User } from "@prisma/client";
 import faker from "faker";
 
 import { createSoftDeleteExtension } from "../../src";
+import { rootDir } from "../unit/utils/mockClient";
 import client from "./client";
 
 describe("nested reads", () => {
@@ -12,7 +13,7 @@ describe("nested reads", () => {
     testClient = new PrismaClient();
     testClient = testClient.$extends(
       createSoftDeleteExtension(
-        { models: { Comment: true, Profile: true } },
+        { models: { Comment: true, Profile: true }, rootDir },
         // @ts-expect-error - we don't know what the client is
         { client: testClient }
       )
