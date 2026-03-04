@@ -1,11 +1,11 @@
 import { createSoftDeleteExtension } from "../../src";
-import { MockClient } from "./utils/mockClient";
+import { MockClient, rootDir } from "./utils/mockClient";
 
 describe("findUniqueOrThrow", () => {
   it("does not change findUniqueOrThrow params if model is not in the list", async () => {
     const client = new MockClient();
     const extendedClient = client.$extends(
-      createSoftDeleteExtension({ models: {} })
+      createSoftDeleteExtension({ models: {}, rootDir })
     );
 
     await extendedClient.user.findUniqueOrThrow({
@@ -21,7 +21,7 @@ describe("findUniqueOrThrow", () => {
   it("does not modify findUniqueOrThrow results", async () => {
     const client = new MockClient();
     const extendedClient = client.$extends(
-      createSoftDeleteExtension({ models: { User: true } })
+      createSoftDeleteExtension({ models: { User: true }, rootDir })
     );
 
     const queryResult = { id: 1, deleted: true };
@@ -41,6 +41,7 @@ describe("findUniqueOrThrow", () => {
     const extendedClient = client.$extends(
       createSoftDeleteExtension({
         models: { User: true },
+        rootDir,
       })
     );
 
@@ -63,6 +64,7 @@ describe("findUniqueOrThrow", () => {
     const extendedClient = client.$extends(
       createSoftDeleteExtension({
         models: { User: true },
+        rootDir,
       })
     );
 
@@ -85,6 +87,7 @@ describe("findUniqueOrThrow", () => {
     const extendedClient = client.$extends(
       createSoftDeleteExtension({
         models: { User: true },
+        rootDir,
       })
     );
 
@@ -92,7 +95,9 @@ describe("findUniqueOrThrow", () => {
     await extendedClient.user.findUniqueOrThrow(undefined);
 
     // params have not been modified
-    expect(extendedClient.user.findUniqueOrThrow.query).toHaveBeenCalledWith(undefined);
+    expect(extendedClient.user.findUniqueOrThrow.query).toHaveBeenCalledWith(
+      undefined
+    );
   });
 
   it("does not modify findUniqueOrThrow to be a findFirst when invalid where passed", async () => {
@@ -100,18 +105,23 @@ describe("findUniqueOrThrow", () => {
     const extendedClient = client.$extends(
       createSoftDeleteExtension({
         models: { User: true },
+        rootDir,
       })
     );
 
     // @ts-expect-error testing if user doesn't pass where accidentally
     await extendedClient.user.findUniqueOrThrow({});
-    expect(extendedClient.user.findUniqueOrThrow.query).toHaveBeenCalledWith({});
+    expect(extendedClient.user.findUniqueOrThrow.query).toHaveBeenCalledWith(
+      {}
+    );
     client.user.findUniqueOrThrow.mockClear();
 
     // expect empty where not to modify params
     // @ts-expect-error testing if user passes where without unique field
     await extendedClient.user.findUniqueOrThrow({ where: {} });
-    expect(extendedClient.user.findUniqueOrThrow.query).toHaveBeenCalledWith({ where: {} });
+    expect(extendedClient.user.findUniqueOrThrow.query).toHaveBeenCalledWith({
+      where: {},
+    });
     client.user.findUniqueOrThrow.mockClear();
 
     // expect where with undefined id field not to modify params

@@ -1,11 +1,11 @@
 import { createSoftDeleteExtension } from "../../src";
-import { MockClient } from "./utils/mockClient";
+import { MockClient, rootDir } from "./utils/mockClient";
 
 describe("updateMany", () => {
   it("does not change updateMany action if model is not in the list", async () => {
     const client = new MockClient();
     const extendedClient = client.$extends(
-      createSoftDeleteExtension({ models: {} })
+      createSoftDeleteExtension({ models: {}, rootDir })
     );
 
     await extendedClient.user.updateMany({
@@ -23,7 +23,7 @@ describe("updateMany", () => {
   it("does not modify updateMany results", async () => {
     const client = new MockClient();
     const extendedClient = client.$extends(
-      createSoftDeleteExtension({ models: { User: true } })
+      createSoftDeleteExtension({ models: { User: true }, rootDir })
     );
 
     extendedClient.user.updateMany.query.mockImplementation(
@@ -41,14 +41,16 @@ describe("updateMany", () => {
   it("does not change updateMany action if args not passed", async () => {
     const client = new MockClient();
     const extendedClient = client.$extends(
-      createSoftDeleteExtension({ models: { User: true } })
+      createSoftDeleteExtension({ models: { User: true }, rootDir })
     );
 
     // @ts-expect-error - args are required
     await extendedClient.user.updateMany(undefined);
 
     // params have not been modified
-    expect(extendedClient.user.updateMany.query).toHaveBeenCalledWith(undefined);
+    expect(extendedClient.user.updateMany.query).toHaveBeenCalledWith(
+      undefined
+    );
   });
 
   it("excludes deleted records from root updateMany action", async () => {
@@ -56,6 +58,7 @@ describe("updateMany", () => {
     const extendedClient = client.$extends(
       createSoftDeleteExtension({
         models: { User: true },
+        rootDir,
       })
     );
 
@@ -79,6 +82,7 @@ describe("updateMany", () => {
     const extendedClient = client.$extends(
       createSoftDeleteExtension({
         models: { User: true },
+        rootDir,
       })
     );
 
@@ -100,6 +104,7 @@ describe("updateMany", () => {
     const extendedClient = client.$extends(
       createSoftDeleteExtension({
         models: { Comment: true },
+        rootDir,
       })
     );
 
@@ -153,6 +158,7 @@ describe("updateMany", () => {
         models: {
           User: true,
         },
+        rootDir,
       })
     );
 
@@ -181,6 +187,7 @@ describe("updateMany", () => {
             },
           },
         },
+        rootDir,
       })
     );
 

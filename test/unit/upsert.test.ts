@@ -1,11 +1,11 @@
 import { createSoftDeleteExtension } from "../../src";
-import { MockClient } from "./utils/mockClient";
+import { MockClient, rootDir } from "./utils/mockClient";
 
 describe("upsert", () => {
   it("does not modify upsert results", async () => {
     const client = new MockClient();
     const extendedClient = client.$extends(
-      createSoftDeleteExtension({ models: { User: true } })
+      createSoftDeleteExtension({ models: { User: true }, rootDir })
     );
 
     extendedClient.user.upsert.query.mockImplementation(
@@ -30,6 +30,7 @@ describe("upsert", () => {
     const extendedClient = client.$extends(
       createSoftDeleteExtension({
         models: { User: true },
+        rootDir,
       })
     );
 
@@ -51,6 +52,7 @@ describe("upsert", () => {
     const extendedClient = client.$extends(
       createSoftDeleteExtension({
         models: { User: true },
+        rootDir,
       })
     );
 
@@ -86,6 +88,7 @@ describe("upsert", () => {
     const extendedClient = client.$extends(
       createSoftDeleteExtension({
         models: { User: true },
+        rootDir,
       })
     );
 

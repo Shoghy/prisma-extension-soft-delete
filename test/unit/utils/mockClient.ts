@@ -1,3 +1,4 @@
+import path from "path";
 import { Prisma } from "@prisma/client";
 
 type DelegateByModel<Model extends Prisma.ModelName> = Model extends "User"
@@ -87,6 +88,8 @@ function initModel(callbacks: Partial<{ [key in Operation]: jest.Mock }> = {}) {
     return acc;
   }, {});
 }
+
+export const rootDir = path.resolve(__dirname, "../..");
 
 export class MockClient {
   user: MockOperations<"User">;

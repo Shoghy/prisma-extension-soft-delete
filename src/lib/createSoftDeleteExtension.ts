@@ -22,6 +22,7 @@ import {
   createWhereParams,
   createGroupByParams,
   CreateParams,
+  init,
 } from "./helpers/createParams";
 
 import { Config, ModelConfig } from "./types";
@@ -39,6 +40,7 @@ export function createSoftDeleteExtension({
     allowToOneUpdates: false,
     allowCompoundUniqueIndexWhere: false,
   },
+  rootDir,
 }: Config) {
   if (!defaultConfig.field) {
     throw new Error(
@@ -50,6 +52,8 @@ export function createSoftDeleteExtension({
       "prisma-extension-soft-delete: defaultConfig.createValue is required"
     );
   }
+
+  init(rootDir);
 
   const modelConfig: Partial<Record<Prisma.ModelName, ModelConfig>> = {};
 
@@ -109,8 +113,8 @@ export function createSoftDeleteExtension({
     return client.$extends({
       query: {
         $allModels: {
-          // @ts-expect-error - we don't know what the client is
           $allOperations: withNestedOperations({
+            // @ts-expect-error - we don't know what the client is
             async $rootOperation(initialParams) {
               const createParams =
                 createParamsByModel[initialParams.model || ""]?.[

@@ -1,29 +1,67 @@
-import { Prisma } from "@prisma/client";
+import fs from "fs";
+import path from "path";
+import { Document } from "@prisma/dmmf";
 import { NestedParams } from "prisma-extension-nested-operations";
 
+import { getDMMF, MultipleSchemas } from "@prisma/internals";
 import { ModelConfig } from "../types";
 import { addDeletedToSelect } from "../utils/nestedReads";
+import { getSchemasPath } from "./getSchemasPath";
 
 const uniqueFieldsByModel: Record<string, string[]> = {};
 const uniqueIndexFieldsByModel: Record<string, string[]> = {};
 
-Prisma.dmmf.datamodel.models.forEach((model) => {
-  // add unique fields derived from indexes
-  const uniqueIndexFields: string[] = [];
-  model.uniqueFields.forEach((field) => {
-    uniqueIndexFields.push(field.join("_"));
-  });
-  uniqueIndexFieldsByModel[model.name] = uniqueIndexFields;
+function DMMFReader(dmmf: Document) {
+  dmmf.datamodel.models.forEach((model) => {
+    // add unique fields derived from indexes
+    const uniqueIndexFields: string[] = [];
+    model.uniqueFields.forEach((field) => {
+      uniqueIndexFields.push(field.join("_"));
+    });
+    uniqueIndexFieldsByModel[model.name] = uniqueIndexFields;
 
-  // add id field and unique fields from @unique decorator
-  const uniqueFields: string[] = [];
-  model.fields.forEach((field) => {
-    if (field.isId || field.isUnique) {
-      uniqueFields.push(field.name);
-    }
+    // add id field and unique fields from @unique decorator
+    const uniqueFields: string[] = [];
+    model.fields.forEach((field) => {
+      if (field.isId || field.isUnique) {
+        uniqueFields.push(field.name);
+      }
+    });
+    uniqueFieldsByModel[model.name] = uniqueFields;
   });
-  uniqueFieldsByModel[model.name] = uniqueFields;
-});
+}
+
+export async function init(rootDir: string) {
+  const schemasPath = await getSchemasPath(rootDir);
+
+  if (fs.statSync(schemasPath).isFile()) {
+    const fileContent = fs.readFileSync(schemasPath, { encoding: "utf-8" });
+    const dmmf = await getDMMF({
+      datamodel: fileContent,
+    });
+    DMMFReader(dmmf);
+    return;
+  }
+
+  const files = fs.readdirSync(schemasPath, {
+    encoding: "utf-8",
+    recursive: true,
+  });
+
+  const schemasContent: MultipleSchemas = [];
+  for (const file of files) {
+    const filePath = path.join(schemasPath, file);
+    if (filePath.endsWith(".prisma") && fs.statSync(filePath).isFile()) {
+      const fileContent = fs.readFileSync(filePath, { encoding: "utf-8" });
+      schemasContent.push([filePath, fileContent]);
+    }
+  }
+
+  const dmmf = await getDMMF({
+    datamodel: schemasContent,
+  });
+  DMMFReader(dmmf);
+}
 
 export type Params = Omit<NestedParams<any>, "operation"> & {
   operation: string;
@@ -154,10 +192,7 @@ export const createUpsertParams: CreateParams = (_, params) => {
   return { params };
 };
 
-function validateFindUniqueParams(
-  params: Params,
-  config: ModelConfig
-): void {
+function validateFindUniqueParams(params: Params, config: ModelConfig): void {
   const uniqueIndexFields = uniqueIndexFieldsByModel[params.model || ""] || [];
   const uniqueIndexField = Object.keys(params.args?.where || {}).find((key) =>
     uniqueIndexFields.includes(key)
@@ -215,7 +250,8 @@ export const createFindUniqueParams: CreateParams = (config, params) => {
         where: {
           ...params.args?.where,
           // allow overriding the deleted field in where
-          [config.field]: params.args?.where?.[config.field] || config.createValue(false),
+          [config.field]:
+            params.args?.where?.[config.field] || config.createValue(false),
         },
       },
     },
@@ -238,7 +274,8 @@ export const createFindUniqueOrThrowParams: CreateParams = (config, params) => {
         where: {
           ...params.args?.where,
           // allow overriding the deleted field in where
-          [config.field]: params.args?.where?.[config.field] || config.createValue(false),
+          [config.field]:
+            params.args?.where?.[config.field] || config.createValue(false),
         },
       },
     },

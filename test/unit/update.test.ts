@@ -1,11 +1,11 @@
 import { createSoftDeleteExtension } from "../../src";
-import { MockClient } from "./utils/mockClient";
+import { MockClient, rootDir } from "./utils/mockClient";
 
 describe("update", () => {
   it("does not change update action if model is not in the list", async () => {
     const client = new MockClient();
     const extendedClient = client.$extends(
-      createSoftDeleteExtension({ models: {} })
+      createSoftDeleteExtension({ models: {}, rootDir })
     );
 
     await extendedClient.user.update({
@@ -23,7 +23,7 @@ describe("update", () => {
   it("does not modify update results", async () => {
     const client = new MockClient();
     const extendedClient = client.$extends(
-      createSoftDeleteExtension({ models: { User: true } })
+      createSoftDeleteExtension({ models: { User: true }, rootDir })
     );
 
     extendedClient.user.update.query.mockImplementation(
@@ -42,6 +42,7 @@ describe("update", () => {
     const extendedClient = client.$extends(
       createSoftDeleteExtension({
         models: { User: true },
+        rootDir,
       })
     );
 
@@ -71,6 +72,7 @@ describe("update", () => {
           createValue: Boolean,
           allowToOneUpdates: true,
         },
+        rootDir,
       })
     );
 
@@ -103,6 +105,7 @@ describe("update", () => {
     const extendedClient = client.$extends(
       createSoftDeleteExtension({
         models: { User: true },
+        rootDir,
       })
     );
 
@@ -143,7 +146,7 @@ describe("update", () => {
   it("does not modify update when no args are passed", async () => {
     const client = new MockClient();
     const extendedClient = client.$extends(
-      createSoftDeleteExtension({ models: { User: true } })
+      createSoftDeleteExtension({ models: { User: true }, rootDir })
     );
 
     // @ts-expect-error - args are required
@@ -156,7 +159,7 @@ describe("update", () => {
   it("does not modify update when no where is passed", async () => {
     const client = new MockClient();
     const extendedClient = client.$extends(
-      createSoftDeleteExtension({ models: { User: true } })
+      createSoftDeleteExtension({ models: { User: true }, rootDir })
     );
 
     // @ts-expect-error - where is required

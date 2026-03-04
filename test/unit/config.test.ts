@@ -1,7 +1,7 @@
 import faker from "faker";
 
 import { createSoftDeleteExtension } from "../../src";
-import { MockClient } from "./utils/mockClient";
+import { MockClient, rootDir } from "./utils/mockClient";
 
 describe("config", () => {
   it('does not soft delete models where config is passed as "false"', async () => {
@@ -11,6 +11,7 @@ describe("config", () => {
         models: {
           User: false,
         },
+        rootDir,
       })
     );
 
@@ -54,6 +55,7 @@ describe("config", () => {
           field: "deletedAt",
           createValue: () => deletedAt,
         },
+        rootDir,
       })
     );
 
@@ -135,6 +137,7 @@ describe("config", () => {
           },
           Comment: true,
         },
+        rootDir,
       })
     );
 
@@ -186,6 +189,7 @@ describe("config", () => {
             return null;
           },
         },
+        rootDir,
       })
     );
 

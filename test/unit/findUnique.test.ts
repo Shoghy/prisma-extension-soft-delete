@@ -1,11 +1,11 @@
 import { createSoftDeleteExtension } from "../../src";
-import { MockClient } from "./utils/mockClient";
+import { MockClient, rootDir } from "./utils/mockClient";
 
 describe("findUnique", () => {
   it("does not change findUnique params if model is not in the list", async () => {
     const client = new MockClient();
     const extendedClient = client.$extends(
-      createSoftDeleteExtension({ models: {} })
+      createSoftDeleteExtension({ models: {}, rootDir })
     );
 
     await extendedClient.user.findUnique({
@@ -21,7 +21,7 @@ describe("findUnique", () => {
   it("does not modify findUnique results", async () => {
     const client = new MockClient();
     const extendedClient = client.$extends(
-      createSoftDeleteExtension({ models: { User: true } })
+      createSoftDeleteExtension({ models: { User: true }, rootDir })
     );
 
     const queryResult = { id: 1, deleted: true };
@@ -41,6 +41,7 @@ describe("findUnique", () => {
     const extendedClient = client.$extends(
       createSoftDeleteExtension({
         models: { User: true },
+        rootDir,
       })
     );
 
@@ -63,6 +64,7 @@ describe("findUnique", () => {
     const extendedClient = client.$extends(
       createSoftDeleteExtension({
         models: { User: true },
+        rootDir,
       })
     );
 
@@ -85,6 +87,7 @@ describe("findUnique", () => {
     const extendedClient = client.$extends(
       createSoftDeleteExtension({
         models: { User: true },
+        rootDir,
       })
     );
 
@@ -113,6 +116,7 @@ describe("findUnique", () => {
             allowCompoundUniqueIndexWhere: true,
           },
         },
+        rootDir,
       })
     );
 
@@ -142,6 +146,7 @@ describe("findUnique", () => {
     const extendedClient = client.$extends(
       createSoftDeleteExtension({
         models: { User: true },
+        rootDir,
       })
     );
 
@@ -149,7 +154,9 @@ describe("findUnique", () => {
     await extendedClient.user.findUnique(undefined);
 
     // params have not been modified
-    expect(extendedClient.user.findUnique.query).toHaveBeenCalledWith(undefined);
+    expect(extendedClient.user.findUnique.query).toHaveBeenCalledWith(
+      undefined
+    );
     expect(client.user.findFirst).not.toHaveBeenCalled();
   });
 
@@ -158,6 +165,7 @@ describe("findUnique", () => {
     const extendedClient = client.$extends(
       createSoftDeleteExtension({
         models: { User: true },
+        rootDir,
       })
     );
 
@@ -169,7 +177,9 @@ describe("findUnique", () => {
     // expect empty where not to modify params
     // @ts-expect-error testing if user passes where without unique field
     await extendedClient.user.findUnique({ where: {} });
-    expect(extendedClient.user.findUnique.query).toHaveBeenCalledWith({ where: {} });
+    expect(extendedClient.user.findUnique.query).toHaveBeenCalledWith({
+      where: {},
+    });
     client.user.findUnique.mockClear();
 
     // expect where with undefined id field not to modify params

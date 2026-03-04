@@ -1,23 +1,25 @@
 import { createSoftDeleteExtension } from "../../src";
-import { MockClient } from "./utils/mockClient";
+import { MockClient, rootDir } from "./utils/mockClient";
 
 describe("delete", () => {
   it("does not change delete action if model is not in the list", async () => {
     const client = new MockClient();
     const extendedClient = client.$extends(
-      createSoftDeleteExtension({ models: {} })
+      createSoftDeleteExtension({ models: {}, rootDir })
     );
 
     await extendedClient.user.delete({ where: { id: 1 } });
 
     // params have not been modified
-    expect(extendedClient.user.delete.query).toHaveBeenCalledWith({ where: { id: 1 } });
+    expect(extendedClient.user.delete.query).toHaveBeenCalledWith({
+      where: { id: 1 },
+    });
   });
 
   it("does not change nested delete action if model is not in the list", async () => {
     const client = new MockClient();
     const extendedClient = client.$extends(
-      createSoftDeleteExtension({ models: {} })
+      createSoftDeleteExtension({ models: {}, rootDir })
     );
 
     await extendedClient.user.update({
@@ -43,7 +45,7 @@ describe("delete", () => {
   it("does not modify delete results", async () => {
     const client = new MockClient();
     const extendedClient = client.$extends(
-      createSoftDeleteExtension({ models: { User: true } })
+      createSoftDeleteExtension({ models: { User: true }, rootDir })
     );
 
     const queryResult = { id: 1, deleted: true };
@@ -57,7 +59,7 @@ describe("delete", () => {
   it("does not modify delete with no args", async () => {
     const client = new MockClient();
     const extendedClient = client.$extends(
-      createSoftDeleteExtension({ models: { User: true } })
+      createSoftDeleteExtension({ models: { User: true }, rootDir })
     );
 
     client.user.delete.mockImplementation((() => Promise.resolve({})) as any);
@@ -72,7 +74,7 @@ describe("delete", () => {
   it("does not modify delete with no where", async () => {
     const client = new MockClient();
     const extendedClient = client.$extends(
-      createSoftDeleteExtension({ models: { User: true } })
+      createSoftDeleteExtension({ models: { User: true }, rootDir })
     );
 
     // @ts-expect-error - where is required
@@ -88,6 +90,7 @@ describe("delete", () => {
     const extendedClient = client.$extends(
       createSoftDeleteExtension({
         models: { User: true },
+        rootDir,
       })
     );
 
@@ -105,6 +108,7 @@ describe("delete", () => {
     const extendedClient = client.$extends(
       createSoftDeleteExtension({
         models: { Profile: true },
+        rootDir,
       })
     );
 
@@ -129,6 +133,7 @@ describe("delete", () => {
     const extendedClient = client.$extends(
       createSoftDeleteExtension({
         models: { Profile: true },
+        rootDir,
       })
     );
 
@@ -153,6 +158,7 @@ describe("delete", () => {
     const extendedClient = client.$extends(
       createSoftDeleteExtension({
         models: { Post: true },
+        rootDir,
       })
     );
 
@@ -184,6 +190,7 @@ describe("delete", () => {
     const extendedClient = client.$extends(
       createSoftDeleteExtension({
         models: { Post: true },
+        rootDir,
       })
     );
 
